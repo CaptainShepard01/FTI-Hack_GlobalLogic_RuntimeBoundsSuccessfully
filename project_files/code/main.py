@@ -7,6 +7,18 @@ from decorators import performance
 
 cap = cv2.VideoCapture("../resources/train.mp4")
 
+STEP = 250
+diapasons = np.zeros(20, dtype="int")
+
+
+def to_diapason(tup):
+    (decimal, integer) = tup
+    if integer == 0 and decimal <= 0.2:
+        return None
+    if decimal - 0 > 1e-4:
+        return integer
+    return integer - 1
+
 
 def capture_dynamic():
     toplist, winlist = [], []
@@ -40,7 +52,7 @@ def get_frame(img):
 
     img = cv2.erode(img, kernel, iterations=1)
 
-    return cv2.findContours(img, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+    return cv2.findContours(img, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE), img
 
 
 @performance
@@ -61,26 +73,30 @@ def process_frames():
             print(i)
             break
 
-        con, hir = get_frame(img)
+        ((con, hir), img) = get_frame(img)
+
+        # new_img = np.zeros(img.shape, dtype='uint8')
+        # cv2.drawContours(new_img, con, -1, (230, 111, 148), 1)
+        # cv2.imshow("Result", new_img)
 
         # print(len(con))
 
-        # cv2.imshow('Result', img)
+        cv2.imshow('Result', img)
 
-        # if cv2.waitKey(25) & 0xFF == ord('='):
-        #     new_img = np.zeros(img.shape, dtype='uint8')
-        #
-        #     con, hir = cv2.findContours(img, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
-        #     cv2.drawContours(new_img, con, -1, (230, 111, 148), 1)
-        #
-        #     # print()
-        #
-        #     # cv2.imshow("Result", new_img)
-        #     break
-        #
-        # if cv2.waitKey(25) & 0xFF == ord('q'):
-        #     cv2.destroyAllWindows()
-        #     break
+        if cv2.waitKey(25) & 0xFF == ord('='):
+            new_img = np.zeros(img.shape, dtype='uint8')
+
+            # con, hir = cv2.findContours(img, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+            cv2.drawContours(new_img, con, -1, (230, 111, 148), 1)
+
+            cv2.imshow("Result", new_img)
+
+            cv2.waitKey(0)
+            # break
+
+        if cv2.waitKey(25) & 0xFF == ord('q'):
+            cv2.destroyAllWindows()
+            break
 
 
 if __name__ == "__main__":
