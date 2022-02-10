@@ -3,6 +3,11 @@ import numpy as np
 import win32gui
 from PIL import ImageGrab
 
+from decorators import performance
+
+cap = cv2.VideoCapture("../resources/train.mp4")
+
+
 def capture_dynamic():
     toplist, winlist = [], []
 
