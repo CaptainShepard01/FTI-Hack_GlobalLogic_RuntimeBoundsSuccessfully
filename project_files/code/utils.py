@@ -22,18 +22,18 @@ def explode_xy(xy):
 
 
 def shoelace_area(x_list, y_list):
-    a1, a2 = 0, 0
-    x_list.append(x_list[0])
-    y_list.append(y_list[0])
-    for j in range(len(x_list) - 1):
-        a1 += x_list[j] * y_list[j + 1]
-        a2 += y_list[j] * x_list[j + 1]
-    l = abs(a1 - a2) / 2
-    return l
-
-
-def centroid(x_list, y_list):
-    _len = len(x_list)
-    x = sum(x_list) / _len
-    y = sum(y_list) / _len
-    return x, y
+    # a = 0.0
+    # n = len(x_list)
+    # for i in range(n):
+    #     j = (i + 1) % n
+    #     a += x_list[i] * y_list[j]
+    #     a -= x_list[j] * y_list[i]
+    # a = abs(a) / 2
+    a = 0.0
+    n = len(x_list)
+    j = n - 1
+    for i in range(n):
+        a += (x_list[j] + x_list[i]) * (y_list[j] - y_list[i])
+        j = i
+    a = abs(a) / 2
+    return a
