@@ -90,22 +90,22 @@ def create_histogram(data, bins: list, name: str) -> None:
 
 @performance
 def process_frames():
-    i = 0
+    # i = 0
     number_of_particles = []
     while True:
         # We were counting frames
-        i += 1
+        # i += 1
 
         (success, img) = cap.read()
-        temp = img
+        # temp = img
         if not success:
-            print(i)
+            # print(i)
             break
 
-        cv2.rectangle(img, (0, 0), (img.shape[1], img.shape[0]), (255, 255, 255), thickness=2)
+        # cv2.rectangle(img, (0, 0), (img.shape[1], img.shape[0]), (255, 255, 255), thickness=2)
         ((con, hir), img) = get_frame(img)
 
-        result.write(cv2.bitwise_or(cv2.cvtColor(img, cv2.COLOR_GRAY2BGR), temp))
+        # result.write(cv2.bitwise_or(cv2.cvtColor(img, cv2.COLOR_GRAY2BGR), temp))
 
         cv2.imshow('Result', img)
         number_of_particles.append(count_parts(con, hir))
@@ -126,7 +126,7 @@ def process_frames():
                     ellipse = cv2.fitEllipse(con[i])
                     cv2.ellipse(img, ellipse, (112, 112, 112), thickness=2)
 
-            # print(count_parts(con))
+        # print(count_parts(con))
         #
         #     cv2.imshow("Result", img)
         #     cv2.waitKey(0)
@@ -135,6 +135,10 @@ def process_frames():
         #     cv2.destroyAllWindows()
         #     break
 
+    return number_of_particles
+
+
+def visualization_and_mse(number_of_particles):
     print("Test[54]: ", number_of_particles[54])
     create_histogram(number_of_particles[54], [num * STEP for num in range(0, 20)], "Test[54]")
     print("Test[101]: ", number_of_particles[101])
@@ -150,10 +154,9 @@ def process_frames():
     print("MSE for Test[101]: ", mse_101)
     print("MSE for Test[256]: ", mse_256)
 
-    cap.release()
-    result.release()
-    return number_of_particles
-
 
 if __name__ == "__main__":
     result_array = process_frames()
+    visualization_and_mse(result_array)
+    cap.release()
+    result.release()
