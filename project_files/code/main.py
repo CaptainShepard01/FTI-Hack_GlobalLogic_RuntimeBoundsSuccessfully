@@ -14,7 +14,7 @@ frame_height = int(cap.get(4))
 size = (frame_width, frame_height)
 fourcc = cv2.VideoWriter_fourcc(*'MP4V')
 
-result = cv2.VideoWriter('../resources/compiled.mp4', fourcc, fps, size)
+result = cv2.VideoWriter('../resources/compiled2.mp4', fourcc, fps, size)
 
 # Step in particles' sizes to define current particle's diapason
 STEP = 250
@@ -52,9 +52,8 @@ def count_parts(contours, hierarchy):
             continue
 
         separated_values = divide_coordinates(contours[i])
-        area_of_con = cv2.contourArea(contours[i], True)
-        if area_of_con <= 50:
-            area_of_con = calculate_area(separated_values[0], separated_values[1])
+
+        area_of_con = calculate_area(separated_values[0], separated_values[1])
 
         if (value := to_diapason(modf(area_of_con / STEP))) is not None:
             diapasons[int(value)] += 1
@@ -65,11 +64,11 @@ def count_parts(contours, hierarchy):
 # Function to process single frame and make it easier to interact with for cv2 (1 gray layer, contours)
 def get_frame(img):
     img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    img = cv2.GaussianBlur(img, (1, 1), 0)
-    img = cv2.Canny(img, 20, 20)
+    # img = cv2.GaussianBlur(img, (1, 1), 0)
+    img = cv2.Canny(img, 3920, 3860, apertureSize=7, L2gradient=True)
 
-    img = cv2.dilate(img, np.ones((5, 5), np.uint8), iterations=1)
-    img = cv2.erode(img, np.ones((5, 5), np.uint8), iterations=1)
+    img = cv2.dilate(img, np.ones((6, 6), np.uint8), iterations=1, borderType=cv2.BORDER_ISOLATED)
+    img = cv2.erode(img, np.ones((6, 6), np.uint8), iterations=1)
 
     return cv2.findContours(img, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE), img
 
@@ -108,29 +107,29 @@ def process_frames():
 
         result.write(cv2.bitwise_or(cv2.cvtColor(img, cv2.COLOR_GRAY2BGR), temp))
 
-        # cv2.imshow('Result', img)
+        cv2.imshow('Result', img)
         number_of_particles.append(count_parts(con, hir))
 
         # Commented code below is for showing the visual representation of program functionality, commented to not slow
         # down algorithm
 
-        # if cv2.waitKey(25) & 0xFF == ord('='):
-        #     for i in range(len(con)):
-        #         separated_values = divide_coordinates(con[i])
-        #         if hir[0][i][2] != -1:
-        #             continue
-        #         area_of_con = cv2.contourArea(con[i], True)
-        #         if area_of_con <= 50:
-        #             area_of_con = calculate_area(separated_values[0], separated_values[1])
-        #
-        #         if 50 < area_of_con <= 5000:
-        #             ellipse = cv2.fitEllipse(con[i])
-        #             cv2.ellipse(img, ellipse, (112, 112, 112), thickness=2)
-        #
-        #     # print(count_parts(con))
-        #
-        #     cv2.imshow("Result", img)
-        #     cv2.waitKey(0)
+        if cv2.waitKey(25) & 0xFF == ord('='):
+            for i in range(len(con)):
+                separated_values = divide_coordinates(con[i])
+                if hir[0][i][2] != -1:
+                    continue
+                area_of_con = cv2.contourArea(con[i], True)
+                if area_of_con <= 50:
+                    area_of_con = calculate_area(separated_values[0], separated_values[1])
+
+                if 50 < area_of_con <= 5000:
+                    ellipse = cv2.fitEllipse(con[i])
+                    cv2.ellipse(img, ellipse, (112, 112, 112), thickness=2)
+
+            # print(count_parts(con))
+
+            cv2.imshow("Result", img)
+            cv2.waitKey(0)
 
         # if cv2.waitKey(25) & 0xFF == ord('q'):
         #     cv2.destroyAllWindows()
