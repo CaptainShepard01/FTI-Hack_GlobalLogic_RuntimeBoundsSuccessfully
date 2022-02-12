@@ -63,11 +63,11 @@ def count_parts(contours, hierarchy):
 
 # Function to process single frame and make it easier to interact with for cv2 (1 gray layer, contours)
 def get_frame(img):
-    img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY, 0)
     # img = cv2.GaussianBlur(img, (1, 1), 0)
-    img = cv2.Canny(img, 3920, 3860, apertureSize=7, L2gradient=True)
+    img = cv2.Canny(img, 1800, 10500, apertureSize=7, L2gradient=True)
 
-    img = cv2.dilate(img, np.ones((6, 6), np.uint8), iterations=1, borderType=cv2.BORDER_ISOLATED)
+    img = cv2.dilate(img, np.ones((6, 6), np.uint8), iterations=1)
     img = cv2.erode(img, np.ones((6, 6), np.uint8), iterations=1)
 
     return cv2.findContours(img, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE), img
@@ -90,16 +90,16 @@ def create_histogram(data, bins: list, name: str) -> None:
 
 @performance
 def process_frames():
-    # i = 0
+    i = 0
     number_of_particles = []
     while True:
         # We were counting frames
-        # i += 1
+        i += 1
 
         (success, img) = cap.read()
         temp = img
         if not success:
-            # print(i)
+            print(i)
             break
 
         cv2.rectangle(img, (0, 0), (img.shape[1], img.shape[0]), (255, 255, 255), thickness=2)
@@ -127,9 +127,9 @@ def process_frames():
                     cv2.ellipse(img, ellipse, (112, 112, 112), thickness=2)
 
             # print(count_parts(con))
-
-            cv2.imshow("Result", img)
-            cv2.waitKey(0)
+        #
+        #     cv2.imshow("Result", img)
+        #     cv2.waitKey(0)
 
         # if cv2.waitKey(25) & 0xFF == ord('q'):
         #     cv2.destroyAllWindows()
