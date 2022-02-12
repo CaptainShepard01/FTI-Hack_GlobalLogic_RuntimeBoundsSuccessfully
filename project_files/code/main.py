@@ -2,14 +2,14 @@ from math import modf
 
 import cv2
 import numpy as np
-import win32gui
-from PIL import ImageGrab
 
 from utils import *
 
 cap = cv2.VideoCapture("../resources/test.mp4")
 
+# Step in particles' sizes to define current particle's diapason
 STEP = 250
+# Epsilon to compare with for equality with zero
 EPS = 1e-4
 
 
@@ -22,52 +22,30 @@ def to_diapason(particle_tuple):
     return integer - 1
 
 
+# Function to look through all the contours which cv2 found and define to which size diapason each particle belongs
 def count_parts(contours, hierarchy):
     diapasons = np.zeros(20, dtype="int")
-    # temp_arr = []
+
     for i in range(len(contours)):
+        # If contour is inside another contour, we have to count only inner one
         if hierarchy[0][i][2] != -1:
             continue
-        separated_values = explode_xy(contours[i])
-        area_of_con = shoelace_area(separated_values[0], separated_values[1])
-        # temp_arr.append(area_of_con)
+
+        separated_values = divide_coordinates(contours[i])
+        area_of_con = calculate_area(separated_values[0], separated_values[1])
         if (value := to_diapason(modf(area_of_con / STEP))) is not None:
             diapasons[int(value)] += 1
 
-        # print(sorted(temp_arr))
     return diapasons
 
 
-def capture_dynamic():
-    toplist, winlist = [], []
-
-    def enum_cb(hwnd, results):
-        winlist.append((hwnd, win32gui.GetWindowText(hwnd)))
-
-    win32gui.EnumWindows(enum_cb, toplist)
-
-    wnd = [(hwnd, title) for hwnd, title in winlist if 'firefox' in title.lower()]
-
-    if wnd:
-        wnd = wnd[0]
-        hwnd = wnd[0]
-
-        bbox = win32gui.GetWindowRect(hwnd)
-        img = ImageGrab.grab(bbox)
-        return img
-    else:
-        return None
-
-
+# Function to process single frame and make it easier to interact with for cv2 (1 gray layer, contours)
 def get_frame(img):
     img = cv2.GaussianBlur(img, (1, 1), 0)
     img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-
     img = cv2.Canny(img, 20, 20)
 
-    # kernel = np.ones((5, 5), np.uint8)
     img = cv2.dilate(img, np.ones((4, 4), np.uint8), iterations=1)
-    #
     img = cv2.erode(img, np.ones((4, 4), np.uint8), iterations=1)
 
     return cv2.findContours(img, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE), img
@@ -78,16 +56,9 @@ def process_frames():
     # i = 0
     number_of_particles = []
     while True:
-        # #   Dynamic Version
-        # img = capture_dynamic()
-        #
-        # if(img == None):
-        #     print("No Window Found! Please Try Again")
-        #     break
-        #
-        # img = np.array(img)
-
+        # We were counting frames
         # i += 1
+
         (success, img) = cap.read()
         if not success:
             # print(i)
@@ -95,8 +66,12 @@ def process_frames():
 
         cv2.rectangle(img, (0, 0), (img.shape[1], img.shape[0]), (255, 255, 255), thickness=2)
         ((con, hir), img) = get_frame(img)
+
         # cv2.imshow('Result', img)
         number_of_particles.append(count_parts(con, hir))
+
+        # Commented code below is for showing the visual representation of program functionality, commented to not slow
+        # down algorithm
 
         # if cv2.waitKey(25) & 0xFF == ord('='):
         #     for i in range(len(con)):
@@ -124,6 +99,8 @@ def process_frames():
     print("Test[101]: ", number_of_particles[101])
     print("Test[256]: ", number_of_particles[256])
 
+    return number_of_particles
+
 
 if __name__ == "__main__":
-    process_frames()
+    result_array = process_frames()

@@ -1,6 +1,7 @@
 from time import time
 
 
+# Decorator to detect how much time function works
 def performance(func):
     def wrapper(*args, **kwargs):
         t1 = time()
@@ -12,23 +13,16 @@ def performance(func):
     return wrapper
 
 
-def explode_xy(xy):
-    xl = []
-    yl = []
-    for i in range(len(xy)):
-        xl.append(xy[i][0][0])
-        yl.append(xy[i][0][1])
-    return xl, yl
+def divide_coordinates(xy_list):
+    x_list = []
+    y_list = []
+    for i in range(len(xy_list)):
+        x_list.append(xy_list[i][0][0])
+        y_list.append(xy_list[i][0][1])
+    return x_list, y_list
 
 
-def shoelace_area(x_list, y_list):
-    # a = 0.0
-    # n = len(x_list)
-    # for i in range(n):
-    #     j = (i + 1) % n
-    #     a += x_list[i] * y_list[j]
-    #     a -= x_list[j] * y_list[i]
-    # a = abs(a) / 2
+def calculate_area(x_list, y_list):
     a = 0.0
     n = len(x_list)
     j = n - 1
